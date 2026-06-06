@@ -1,0 +1,6 @@
+@echo off
+cd /d "%~dp0"
+echo Freeing port 3007...
+node scripts/free-port.js
+echo Starting backend...
+npm run dev
