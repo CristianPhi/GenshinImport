@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const pool = require('./config/db');
+const runMigrations = require('./migrations/init');
 const authRoutes = require('./routes/auth');
 const weaponRoutes = require('./routes/weapons');
 const orderRoutes = require('./routes/orders');
@@ -48,6 +49,10 @@ app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ message: 'Internal server error', error: err.message });
 });
+
+runMigrations()
+  .then(() => console.log('Database initialized.'))
+  .catch((err) => console.error('Migration error (server will still start):', err.message));
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
