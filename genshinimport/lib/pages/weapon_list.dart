@@ -25,15 +25,13 @@ class _WeaponListPageState extends State<WeaponListPage> {
   }
 
   void _refreshWeapons() {
-    setState(() {
-      futureWeapons = ApiService.getWeapons();
-    });
+    setState(() => futureWeapons = ApiService.getWeapons());
   }
 
   void _openDetail(Weapon weapon) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WeaponDetailPage(weapon: weapon)),
+      MaterialPageRoute(builder: (_) => WeaponDetailPage(weapon: weapon)),
     );
   }
 
@@ -41,7 +39,7 @@ class _WeaponListPageState extends State<WeaponListPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => WeaponFormPage(
+        builder: (_) => WeaponFormPage(
           weapon: weapon,
           onSave: _refreshWeapons,
           token: widget.token,
@@ -53,129 +51,50 @@ class _WeaponListPageState extends State<WeaponListPage> {
   void _deleteWeapon(int id) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Hapus Weapon?'),
-          content: const Text('Data akan dihapus permanen.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                try {
-                  await ApiService.deleteWeapon(widget.token, id);
-                  if (!mounted) return;
-                  _refreshWeapons();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Weapon dihapus')),
-                  );
-                } catch (e) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              },
-              child: const Text('Hapus'),
-            ),
-          ],
-        );
-      },
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus weapon?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ApiService.deleteWeapon(widget.token, id);
+                if (!mounted) return;
+                _refreshWeapons();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Weapon dihapus')),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('$e')),
+                );
+              }
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
     );
   }
 
-  void _handleMenu(String value, Weapon weapon) {
-    if (value == 'view') {
-      _openDetail(weapon);
-    } else if (value == 'edit') {
-      _openForm(weapon: weapon);
-    } else if (value == 'delete') {
-      _deleteWeapon(weapon.id);
-    }
-  }
-
-  Widget _weaponImage(Weapon weapon) {
-    if (weapon.imageUrl != null && weapon.imageUrl!.isNotEmpty) {
-      return Image.network(
-        weapon.imageUrl!,
-        height: 100,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+  Widget _thumb(Weapon weapon, {double size = 48}) {
+    final url = weapon.imageUrl;
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(url, width: size, height: size, fit: BoxFit.cover),
       );
     }
     return Container(
-      height: 100,
-      color: Colors.grey.shade200,
-      child: const Icon(Icons.shield),
-    );
-  }
-
-  Widget _listTile(Weapon weapon) {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: ListTile(
-        leading: weapon.imageUrl != null && weapon.imageUrl!.isNotEmpty
-            ? Image.network(
-                weapon.imageUrl!,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(Icons.shield),
-              )
-            : const Icon(Icons.shield),
-        title: Text(weapon.name),
-        subtitle: Text('${weapon.type} - Stock: ${weapon.stock}'),
-        onTap: () => _openDetail(weapon),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleMenu(value, weapon),
-          itemBuilder: (context) => [
-            const PopupMenuItem(value: 'view', child: Text('Lihat Detail')),
-            const PopupMenuItem(value: 'edit', child: Text('Edit')),
-            const PopupMenuItem(value: 'delete', child: Text('Hapus')),
-          ],
-        ),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
       ),
-    );
-  }
-
-  Widget _gridTile(Weapon weapon) {
-    return GestureDetector(
-      onTap: () => _openDetail(weapon),
-      child: Card(
-        margin: const EdgeInsets.all(6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _weaponImage(weapon),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(weapon.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(weapon.type),
-                  Text('Stock: ${weapon.stock}'),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: PopupMenuButton<String>(
-                onSelected: (value) => _handleMenu(value, weapon),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'view', child: Text('Lihat')),
-                  const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  const PopupMenuItem(value: 'delete', child: Text('Hapus')),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: const Icon(Icons.shield_outlined, color: Color(0xFF4A6FA5)),
     );
   }
 
@@ -183,10 +102,10 @@ class _WeaponListPageState extends State<WeaponListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weapon List'),
+        title: const Text('Admin'),
         actions: [
           IconButton(
-            icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
+            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
             onPressed: () => setState(() => _isGridView = !_isGridView),
           ),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshWeapons),
@@ -196,13 +115,7 @@ class _WeaponListPageState extends State<WeaponListPage> {
         child: ListView(
           children: [
             const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text('Admin Menu', style: TextStyle(color: Colors.white, fontSize: 20)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('Daftar Weapon'),
-              onTap: () => Navigator.pop(context),
+              child: Text('Menu Admin', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
             ),
             ListTile(
               leading: const Icon(Icons.add),
@@ -212,7 +125,6 @@ class _WeaponListPageState extends State<WeaponListPage> {
                 _openForm();
               },
             ),
-            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
@@ -228,29 +140,72 @@ class _WeaponListPageState extends State<WeaponListPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text('${snapshot.error}'));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final weapons = snapshot.data ?? [];
+          if (weapons.isEmpty) {
             return const Center(child: Text('Belum ada weapon'));
           }
 
-          final weapons = snapshot.data!;
-
           if (_isGridView) {
             return GridView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.75,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.78,
               ),
               itemCount: weapons.length,
-              itemBuilder: (context, index) => _gridTile(weapons[index]),
+              itemBuilder: (context, i) {
+                final w = weapons[i];
+                return InkWell(
+                  onTap: () => _openDetail(w),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: Center(child: _thumb(w, size: 72))),
+                          Text(w.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text('${w.type} · Stock ${w.stock}', style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             );
           }
 
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.all(12),
             itemCount: weapons.length,
-            itemBuilder: (context, index) => _listTile(weapons[index]),
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, i) {
+              final w = weapons[i];
+              return Card(
+                child: ListTile(
+                  leading: _thumb(w),
+                  title: Text(w.name),
+                  subtitle: Text('${w.type} · \$${w.price} · Stock ${w.stock}'),
+                  onTap: () => _openDetail(w),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) {
+                      if (v == 'edit') _openForm(weapon: w);
+                      if (v == 'delete') _deleteWeapon(w.id);
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

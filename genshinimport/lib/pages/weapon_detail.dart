@@ -1,111 +1,60 @@
 import 'package:flutter/material.dart';
 import '../models/weapon.dart';
 
-class WeaponDetailPage extends StatefulWidget {
+class WeaponDetailPage extends StatelessWidget {
   final Weapon weapon;
 
   const WeaponDetailPage({super.key, required this.weapon});
 
   @override
-  State<WeaponDetailPage> createState() => _WeaponDetailPageState();
-}
-
-class _WeaponDetailPageState extends State<WeaponDetailPage> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  List<String> get _images {
-    if (widget.weapon.imageUrl != null && widget.weapon.imageUrl!.isNotEmpty) {
-      return [widget.weapon.imageUrl!];
-    }
-    return [];
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final weapon = widget.weapon;
-    final hasImage = _images.isNotEmpty;
+    final hasImage = weapon.imageUrl != null && weapon.imageUrl!.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(title: Text(weapon.name)),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          SizedBox(
-            height: 220,
-            child: hasImage
-                ? Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      PageView.builder(
-                        controller: _pageController,
-                        itemCount: _images.length,
-                        onPageChanged: (i) => setState(() => _currentPage = i),
-                        itemBuilder: (context, index) {
-                          return Image.network(
-                            _images[index],
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            errorBuilder: (_, __, ___) => _placeholder(),
-                          );
-                        },
-                      ),
-                      if (_images.length > 1)
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(_images.length, (i) {
-                              return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: i == _currentPage
-                                      ? Colors.white
-                                      : Colors.white54,
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                    ],
-                  )
-                : _placeholder(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(weapon.name, style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text('Type: ${weapon.type}'),
-                Text('Stock: ${weapon.stock}'),
-                Text('Price: \$${weapon.price}'),
-                const SizedBox(height: 12),
-                const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(weapon.description),
-              ],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: hasImage
+                  ? Image.network(
+                      weapon.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _placeholder(),
+                    )
+                  : _placeholder(),
             ),
           ),
+          const SizedBox(height: 16),
+          Text(weapon.name, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          _infoRow('Type', weapon.type),
+          _infoRow('Stock', '${weapon.stock}'),
+          _infoRow('Price', '\$${weapon.price}'),
+          const SizedBox(height: 12),
+          const Text('Description', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Text(weapon.description),
         ],
       ),
     );
   }
 
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text('$label: $value', style: TextStyle(color: Colors.grey.shade700)),
+    );
+  }
+
   Widget _placeholder() {
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Center(
-        child: Icon(Icons.image_not_supported, size: 64, color: Colors.grey),
-      ),
+    return ColoredBox(
+      color: Colors.grey.shade100,
+      child: const Center(child: Icon(Icons.image_outlined, size: 48)),
     );
   }
 }

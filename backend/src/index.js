@@ -10,61 +10,64 @@ const weaponRoutes = require('./routes/weapons');
 const orderRoutes = require('./routes/orders');
 
 const app = express();
-const PORT = Number(process.env.PORT || 3000);
+const PORT = Number(process.env.PORT || 3007);
 
 app.use(cors());
 app.use(express.json());
 
-// Simple request logger (development)
 app.use((req, _res, next) => {
-    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-    next();
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
 });
 
-// Health check endpoint
 app.get('/api/health', async (_req, res) => {
-    try {
-        await pool.query('SELECT 1');
-        res.json({ message: 'Backend is running and DB is connected.' });
-    } catch (error) {
-        res.status(500).json({ message: 'Backend running but DB connection failed.', error: error.message });
-    }
+  try {
+    await pool.query('SELECT 1');
+    res.json({ message: 'Backend is running and DB is connected.' });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Backend running but DB connection failed.',
+      error: error.message,
+    });
+  }
 });
 
-// Root info
 app.get('/', (_req, res) => {
-    res.send('Genshin Import Backend — use /api/* endpoints');
+  res.send('Genshin Import Backend — use /api/* endpoints');
 });
 
-// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/weapons', weaponRoutes);
 app.use('/api/orders', orderRoutes);
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Not found' });
 });
 
-// Error handler
 app.use((err, _req, res, _next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+  console.error('Unhandled error:', err);
+  res.status(500).json({ message: 'Internal server error', error: err.message });
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Android emulator: http://10.0.2.2:${PORT}/api`);
 });
 
-// Graceful shutdown
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} sudah dipakai. Cek .env — PORT harus beda dari DB_PORT (MySQL).`);
+  } else {
+    console.error('Server error:', err.message);
+  }
+  process.exit(1);
+});
+
 function shutdown() {
-    console.log('Shutting down server...');
-    server.close(() => {
-        pool.end().then(() => {
-            console.log('DB pool closed. Bye.');
-            process.exit(0);
-        });
-    });
+  console.log('Shutting down server...');
+  server.close(() => {
+    pool.end().then(() => process.exit(0));
+  });
 }
 
 process.on('SIGINT', shutdown);

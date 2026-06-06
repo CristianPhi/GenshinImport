@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "predev": "node scripts/free-port.js",
     "dev": "nodemon src/index.js",
     "seed": "node seed.js"
   },
@@ -17,7 +18,7 @@
     "mysql2": "^3.22.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.14"
   },
   "keywords": [],
   "author": "",

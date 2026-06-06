@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
+import 'app_theme.dart';
+import 'pages/auth_page.dart';
 import 'pages/weapon_list.dart';
 import 'pages/user_dashboard.dart';
 
@@ -39,12 +40,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Genshin Import',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       home: _token == null
-          ? LoginPage(onLoginSuccess: _handleLogin)
+          ? AuthPage(onLoginSuccess: _handleLogin)
           : _role == 'admin'
           ? WeaponListPage(token: _token!, onLogout: _logout)
           : UserDashboardPage(
