@@ -1,47 +1,45 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/weapon.dart';
 
-const int apiPort = 3007;
-const Duration apiTimeout = Duration(seconds: 10);
-
-String get baseUrl {
-  if (kIsWeb) return 'http://localhost:$apiPort/api';
-  if (Platform.isAndroid) return 'http://10.0.2.2:$apiPort/api';
-  return 'http://localhost:$apiPort/api';
-}
+const Duration apiTimeout = Duration(seconds: 15);
 
 class ApiService {
+  static String get _baseUrl => ApiConfig.baseUrl;
+
   static Future<http.Response> _post(String path, {Map<String, String>? headers, Object? body}) {
     return http
-        .post(Uri.parse('$baseUrl$path'), headers: headers, body: body)
+        .post(Uri.parse('$_baseUrl$path'), headers: headers, body: body)
         .timeout(apiTimeout);
   }
 
   static Future<http.Response> _get(String path, {Map<String, String>? headers}) {
-    return http.get(Uri.parse('$baseUrl$path'), headers: headers).timeout(apiTimeout);
+    return http.get(Uri.parse('$_baseUrl$path'), headers: headers).timeout(apiTimeout);
   }
 
   static Future<http.Response> _put(String path, {Map<String, String>? headers, Object? body}) {
     return http
-        .put(Uri.parse('$baseUrl$path'), headers: headers, body: body)
+        .put(Uri.parse('$_baseUrl$path'), headers: headers, body: body)
         .timeout(apiTimeout);
   }
 
   static Future<http.Response> _delete(String path, {Map<String, String>? headers}) {
-    return http.delete(Uri.parse('$baseUrl$path'), headers: headers).timeout(apiTimeout);
+    return http.delete(Uri.parse('$_baseUrl$path'), headers: headers).timeout(apiTimeout);
   }
 
   static Exception _connectionError() {
+    if (ApiConfig.useLocal) {
+      return Exception(
+        'Backend lokal tidak bisa dihubungi.\n'
+        'Jalankan: cd backend && npm run dev',
+      );
+    }
     return Exception(
-      'Backend tidak bisa dihubungi.\n'
-      '1. Buka terminal di folder backend\n'
-      '2. Jalankan: npm run dev\n'
-      '3. Pastikan muncul: Server running on port $apiPort\n'
-      '4. Hot restart app (bukan cuma reload)',
+      'Backend Railway tidak bisa dihubungi.\n'
+      'Cek URL di lib/config/api_config.dart\n'
+      'Pastikan service di Railway sudah Running.',
     );
   }
 
@@ -112,6 +110,8 @@ class ApiService {
       throw Exception('Gagal load weapons');
     } on SocketException {
       throw _connectionError();
+    } on TimeoutException {
+      throw _connectionError();
     }
   }
 
@@ -126,6 +126,8 @@ class ApiService {
       }
       throw Exception('Gagal load orders');
     } on SocketException {
+      throw _connectionError();
+    } on TimeoutException {
       throw _connectionError();
     }
   }
