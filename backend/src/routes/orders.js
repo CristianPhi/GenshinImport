@@ -12,7 +12,23 @@ router.get('/user/:userId', verifyBearerToken, async (req, res) => {
 
   try {
     const [orders] = await pool.query(
-      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
+      `SELECT
+        o.id,
+        o.user_id,
+        o.weapon_id,
+        w.name        AS weapon_name,
+        w.type        AS weapon_type,
+        w.description AS weapon_description,
+        w.price       AS weapon_price,
+        w.image       AS weapon_image,
+        o.quantity,
+        o.total_price,
+        o.status,
+        o.created_at
+      FROM orders o
+      JOIN weapons w ON w.id = o.weapon_id
+      WHERE o.user_id = ?
+      ORDER BY o.created_at DESC`,
       [req.params.userId]
     );
     res.json(orders);
@@ -43,12 +59,23 @@ router.post('/', verifyBearerToken, async (req, res) => {
     }
 
     const weapon = weapons[0];
+
+    if (weapon.stock < quantityNum) {
+      return res.status(400).json({ message: 'Not enough stock available.' });
+    }
+
     const totalPrice = weapon.price * quantityNum;
 
     // Create order
     const [result] = await pool.query(
       'INSERT INTO orders (user_id, weapon_id, quantity, total_price) VALUES (?, ?, ?, ?)',
       [req.user.id, weapon_id, quantityNum, totalPrice]
+    );
+
+    // Decrement weapon stock
+    await pool.query(
+      'UPDATE weapons SET stock = stock - ? WHERE id = ?',
+      [quantityNum, weapon_id]
     );
 
     res.status(201).json({ message: 'Order created.', id: result.insertId });

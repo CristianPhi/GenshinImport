@@ -7,7 +7,12 @@ const router = express.Router();
 router.get('/', async (_req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM weapons ORDER BY id DESC');
-    res.json(rows);
+    const weapons = rows.map((weapon) => ({
+      ...weapon,
+      status: weapon.stock === 0 ? 'sold_out' : 'available',
+      image: weapon.stock === 0 ? null : weapon.image,
+    }));
+    res.json(weapons);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch weapons.', error: error.message });
   }
