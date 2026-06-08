@@ -60,9 +60,9 @@ async function runMigrations() {
     // ── seed: admin user ───────────────────────────────────────────────────
     await conn.query(`
       INSERT INTO users (username, email, password, role)
-      SELECT 'admin', 'admin@genshinimport.com', 'admin123', 'admin'
+      SELECT 'admin', 'admin', 'admin123', 'admin'
       WHERE NOT EXISTS (
-        SELECT 1 FROM users WHERE email = 'admin@genshinimport.com'
+        SELECT 1 FROM users WHERE email = 'admin' OR username = 'admin'
       )
     `);
 

@@ -14,7 +14,6 @@ const database = process.env.DB_NAME || 'genshinimport';
 console.log('Debug DB connection');
 console.log({ host, port, user, database });
 
-// DNS lookup
 dns.lookup(host, { all: true }, (err, addresses) => {
   if (err) {
     console.error('DNS lookup error:', err.message);
@@ -22,7 +21,6 @@ dns.lookup(host, { all: true }, (err, addresses) => {
     console.log('DNS addresses:', addresses);
   }
 
-  // TCP socket test
   const socket = new net.Socket();
   let connected = false;
   socket.setTimeout(5000);
@@ -45,7 +43,6 @@ dns.lookup(host, { all: true }, (err, addresses) => {
     if (!connected) {
       console.log('TCP socket closed (not connected)');
     }
-    // proceed to MySQL test
   });
 
   socket.connect(port, host);

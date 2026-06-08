@@ -21,9 +21,8 @@ try {
       execSync(`taskkill /PID ${pid} /F`, { stdio: 'ignore' });
       console.log(`Port ${PORT}: stopped process ${pid}`);
     } catch {
-      // ignore
+      
     }
   }
 } catch {
-  // port already free
 }

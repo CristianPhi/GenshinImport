@@ -75,7 +75,10 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE email = ? OR username = ? LIMIT 1',
+      [email, email]
+    );
 
     if (rows.length === 0 || rows[0].password !== password) {
       return res.status(401).json({ message: 'Email or password is incorrect.' });
