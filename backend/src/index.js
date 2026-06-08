@@ -14,7 +14,8 @@ const app = express();
 const PORT = Number(process.env.PORT || 3007);
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 app.use((req, _res, next) => {
@@ -48,6 +49,12 @@ app.use((_req, res) => {
 
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({
+      message: 'Gambar terlalu besar. Coba pilih gambar yang lebih kecil.',
+      error: err.message,
+    });
+  }
   res.status(500).json({ message: 'Internal server error', error: err.message });
 });
 

@@ -37,9 +37,14 @@ async function runMigrations() {
         description TEXT,
         stock       INT NOT NULL DEFAULT 0,
         price       DECIMAL(12,2) NOT NULL,
-        image       VARCHAR(500),
+        image       MEDIUMTEXT,
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Upgrade existing tables that still use VARCHAR(500) for base64 images
+    await conn.query(`
+      ALTER TABLE weapons MODIFY COLUMN image MEDIUMTEXT
     `);
 
     // ── orders ─────────────────────────────────────────────────────────────
