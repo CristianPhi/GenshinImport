@@ -55,7 +55,11 @@ runMigrations()
   .then(() => console.log('Database initialized.'))
   .catch((err) => console.error('Migration error (server will still start):', err.message));
 
+<<<<<<< HEAD
 const server = app.listen(PORT, '0.0.0.0', () => {
+=======
+const server = app.listen(PORT, () => {
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Android emulator: http://10.0.2.2:${PORT}/api`);
 });
@@ -70,11 +74,24 @@ server.on('error', (err) => {
 });
 
 function shutdown() {
+<<<<<<< HEAD
   console.log('Shutting down server...');
   server.close(() => {
     pool.end().then(() => process.exit(0));
   });
 }
+=======
+    console.log('Shutting down server...');
+    if (server) {
+        server.close(() => {
+            pool.end().then(() => {
+                console.log('DB pool closed. Bye.');
+                process.exit(0);
+            });
+        });
+    }
+  }
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

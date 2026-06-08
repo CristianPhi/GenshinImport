@@ -29,7 +29,10 @@ async function runMigrations() {
     `);
 
     // ── weapons ────────────────────────────────────────────────────────────
+<<<<<<< HEAD
     // FIX: image column changed to LONGTEXT to support base64-encoded images
+=======
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
     await conn.query(`
       CREATE TABLE IF NOT EXISTS weapons (
         id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,16 +41,23 @@ async function runMigrations() {
         description TEXT,
         stock       INT NOT NULL DEFAULT 0,
         price       DECIMAL(12,2) NOT NULL,
+<<<<<<< HEAD
         image       LONGTEXT,
+=======
+        image       VARCHAR(500),
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
+<<<<<<< HEAD
     // Migrate existing image column to LONGTEXT if it was VARCHAR(500)
     await conn.query(`
       ALTER TABLE weapons MODIFY COLUMN image LONGTEXT
     `).catch(() => {}); // ignore if already correct type
 
+=======
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
     // ── orders ─────────────────────────────────────────────────────────────
     await conn.query(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -63,12 +73,21 @@ async function runMigrations() {
       )
     `);
 
+<<<<<<< HEAD
     // FIX: admin seed uses email='admin' and password='admin123'
     await conn.query(`
       INSERT INTO users (username, email, password, role)
       SELECT 'Admin', 'admin', 'admin123', 'admin'
       WHERE NOT EXISTS (
         SELECT 1 FROM users WHERE email = 'admin'
+=======
+    // ── seed: admin user ───────────────────────────────────────────────────
+    await conn.query(`
+      INSERT INTO users (username, email, password, role)
+      SELECT 'admin', 'admin@genshinimport.com', 'admin123', 'admin'
+      WHERE NOT EXISTS (
+        SELECT 1 FROM users WHERE email = 'admin@genshinimport.com'
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
       )
     `);
 
@@ -86,11 +105,19 @@ async function runMigrations() {
     if (existingWeapons[0].cnt === 0) {
       await conn.query(`
         INSERT INTO weapons (name, type, description, stock, price, image) VALUES
+<<<<<<< HEAD
         ('Aquila Favonia',      'Sword',    'A sword that gleams like the holy falcon of Favonius.',                       10, 150000.00, NULL),
         ('Wolf\\'s Gravestone', 'Claymore', 'A longsword that used to belong to the Wolf Knight of Mondstadt.',           5,  200000.00, NULL),
         ('Skyward Harp',        'Bow',      'A bow that was once used by a god to play the melody of the sky.',           8,  175000.00, NULL),
         ('Lost Prayer',         'Catalyst', 'An ancient catalyst with four pages, each containing a different prayer.',   6,  180000.00, NULL),
         ('Primordial Jade',     'Polearm',  'A polearm carved from primordial jade, said to have been used by the gods.', 7,  190000.00, NULL)
+=======
+        ('Aquila Favonia',   'Sword',    'A sword that gleams like the holy falcon of Favonius.',                          10, 150000.00, NULL),
+        ('Wolf\'s Gravestone', 'Claymore', 'A longsword that used to belong to the Wolf Knight of Mondstadt.',            5,  200000.00, NULL),
+        ('Skyward Harp',     'Bow',       'A bow that was once used by a god to play the melody of the sky.',             8,  175000.00, NULL),
+        ('Lost Prayer',      'Catalyst',  'An ancient catalyst with four pages, each containing a different prayer.',     6,  180000.00, NULL),
+        ('Primordial Jade',  'Polearm',   'A polearm carved from primordial jade, said to have been used by the gods.',   7,  190000.00, NULL)
+>>>>>>> 906f5cd87b1d2794a57d5943901abe0e240113f3
       `);
     }
 
