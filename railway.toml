@@ -1,7 +1,10 @@
+[settings]
+rootDirectory = "backend"
+ 
 [build]
 builder = "nixpacks"
-buildCommand = "cd backend && npm install"
-
+ 
 [deploy]
-startCommand = "cd backend && npm start"
+startCommand = "npm start"
 restartPolicyType = "on_failure"
+ 
